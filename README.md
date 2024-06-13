@@ -22,11 +22,13 @@ repository also contains safe bindings for `libwireplumber-0.5`.
 
 # Building
 
-First, generate the unsafe bindings for `libwireplumber-0.5`. Then build
-`cobble-bar` as normal:
+First, generate the unsafe bindings for `libwireplumber-0.5` using [gir][2].
+Then build `cobble-bar` as normal:
 
 ```
 $ (cd wireplumber-sys && gir -o .)
 $ (cd cobble-bar && cargo build)
-
 ```
+
+[1]: https://github.com/elkowar/eww
+[2]: https://github.com/gtk-rs/gir
