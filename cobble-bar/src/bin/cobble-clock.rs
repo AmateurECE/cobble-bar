@@ -4,6 +4,7 @@ use cobble_bar::sink::PrintSink;
 use futures::{Sink, SinkExt as _};
 use glib::timeout_future;
 use libc::{timespec, CLOCK_REALTIME};
+use serde::Serialize;
 
 /// System time, according to the current timezone and system clock.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -12,6 +13,11 @@ struct LocalTime {
     minutes: u8,
     seconds: u8,
     nanoseconds: u64,
+}
+
+#[derive(Serialize)]
+struct State {
+    content: String,
 }
 
 impl TryFrom<timespec> for LocalTime {
@@ -82,7 +88,12 @@ impl Clock {
                 seconds,
                 nanoseconds,
             } = current_time;
-            sink.send(format!("{hours:0>2}:{minutes:0>2}\n")).await?;
+
+            let state = State {
+                content: format!("{hours:0>2}:{minutes:0>2}"),
+            };
+            let message = serde_json::to_string(&state)? + "\n";
+            sink.send(message).await?;
 
             const NANOSECONDS_PER_SECOND: u64 = 1_000_000_000;
             const NANOSECONDS_PER_MINUTE: u64 = 60 * NANOSECONDS_PER_SECOND;
