@@ -13,7 +13,9 @@ desktop:
 * `cobble-workspaces`: Listens for events from Hyprland to track changes in the
   state of Hyprland workspaces.
 
-The goal for these widgets to be as power-efficient as possible.
+The goal for these widgets to be as power-efficient as possible. In this case,
+that means reasonably small memory footprints, providing interfaces compatible
+with eww's `deflisten` widget mechanism and sleeping as much as possible.
 
 As a consequence of needing to communicate directly with Wireplumber, this
 repository also contains safe bindings for `libwireplumber-0.5`.
