@@ -56,6 +56,11 @@ enum NetworkState {
     Connected,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+struct State {
+    state: NetworkState,
+}
+
 /// Represents the connection state of a wireless interface.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct WirelessInterface {
@@ -417,6 +422,12 @@ async fn new_rtnetlink_connection() -> anyhow::Result<(
     Ok((connection, rthandle, rtnetlink))
 }
 
+fn print_state(state: NetworkState) -> anyhow::Result<()> {
+    let state = State { state };
+    println!("{}", serde_json::to_string(&state)?);
+    Ok(())
+}
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     let (connection, nlhandle, mut nl80211) = new_genetlink_connection().await?;
@@ -432,7 +443,7 @@ async fn main() -> anyhow::Result<()> {
 
     let interface_index = get_interface_index(&rthandle, &interface_name).await?;
     let mut wifi = WirelessInterface::new(interface_index, &rthandle, &nlhandle).await?;
-    println!("{}", serde_json::to_string(&wifi.network_state())?);
+    print_state(wifi.network_state())?;
     loop {
         let mut nl80211 = nl80211.next().fuse();
         let mut rtnetlink = rtnetlink.next().fuse();
@@ -443,7 +454,7 @@ async fn main() -> anyhow::Result<()> {
         };
 
         if wifi.replace_if_changed(next_state).is_some() {
-            println!("{}", serde_json::to_string(&wifi.network_state())?);
+            print_state(wifi.network_state())?;
         }
     }
 }
