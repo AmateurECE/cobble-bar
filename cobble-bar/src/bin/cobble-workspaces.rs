@@ -74,14 +74,7 @@ impl FromStr for HyprlandEvent {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-enum WorkspaceState {
-    Nonexistent,
-    Inactive,
-    Active,
-}
-
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Workspaces {
     workspaces: Vec<u32>,
     active_workspace: u32,
@@ -263,18 +256,56 @@ impl Hyprland {
     }
 }
 
+/// NOTE:
+/// * "circle (solid)": Indicates active workspace.
+/// * "circle-dot": Indicates existing workspaces.
+/// * "circle (light)": Indicates ordinally smaller but non-existent workspaces
+#[derive(serde::Serialize)]
+struct State {
+    content: String,
+}
+
+const CIRCLE_SOLID: &'static str = "<i class=\"fa-solid fa-circle\"></i>";
+const CIRCLE_DOT: &'static str = "<i class=\"fa-regular fa-circle-dot\"></i>";
+const CIRCLE_LIGHT: &'static str = "<i class=\"fa-light fa-circle\"></i>";
+
+impl From<Workspaces> for State {
+    fn from(value: Workspaces) -> Self {
+        let max_workspace = value.workspaces.iter().max().unwrap();
+        let content = (1..max_workspace + 1)
+            .into_iter()
+            .map(|i| {
+                if i == value.active_workspace {
+                    CIRCLE_SOLID
+                } else if value.workspaces.contains(&i) {
+                    CIRCLE_DOT
+                } else {
+                    CIRCLE_LIGHT
+                }
+            })
+            .collect::<String>();
+        State { content }
+    }
+}
+
+fn print_state(workspaces: Workspaces) -> anyhow::Result<()> {
+    let state = State::from(workspaces);
+    println!("{}", serde_json::to_string(&state)?);
+    Ok(())
+}
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     let mut hyprland = Hyprland::new_connection().await?;
     let mut state = hyprland.workspaces().await?;
-    dbg!(&state);
+    print_state(state.clone())?;
 
     let events = hyprland.into_event_stream().await?;
     pin_mut!(events);
 
     while let Some(event) = events.next().await {
         state = state.transition(event);
-        dbg!(&state);
+        print_state(state.clone())?;
     }
     Ok(())
 }
