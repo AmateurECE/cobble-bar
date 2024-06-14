@@ -24,7 +24,8 @@ impl FromVariant for State {
     fn from_variant(variant: &Variant) -> Option<Self> {
         let map: HashMap<String, Variant> = HashMap::from_variant(variant)?;
         let property = map.get("volume")?;
-        let volume = f64::from_variant(property)?;
+        // NOTE: Wireplumber gives us the volume as the cube of a value between 0.0 an 1.0.
+        let volume = (f64::from_variant(property)?.powf(1.0 / 3.0) * 100.0).round();
         Some(Self { volume })
     }
 }
