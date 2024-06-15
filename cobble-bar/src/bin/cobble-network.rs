@@ -56,9 +56,22 @@ enum NetworkState {
     Connected,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
 struct State {
-    state: NetworkState,
+    content: String,
+}
+
+impl From<NetworkState> for State {
+    fn from(value: NetworkState) -> Self {
+        let icon = match value {
+            NetworkState::Disconnected => "fa-exclamation",
+            NetworkState::Connecting => "fa-exclamation",
+            NetworkState::Connected => "fa-wifi",
+        };
+
+        let content = format!("<i class=\"fa-solid {}\"></i>", icon);
+        State { content }
+    }
 }
 
 /// Represents the connection state of a wireless interface.
@@ -423,7 +436,7 @@ async fn new_rtnetlink_connection() -> anyhow::Result<(
 }
 
 fn print_state(state: NetworkState) -> anyhow::Result<()> {
-    let state = State { state };
+    let state = State::from(state);
     println!("{}", serde_json::to_string(&state)?);
     Ok(())
 }
