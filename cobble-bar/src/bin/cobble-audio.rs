@@ -11,7 +11,7 @@ use wireplumber::{
 #[derive(Debug, Serialize)]
 struct State {
     /// The current volume of the default audio sink.
-    volume: f64,
+    volume: u8,
 }
 
 impl StaticVariantType for State {
@@ -25,7 +25,7 @@ impl FromVariant for State {
         let map: HashMap<String, Variant> = HashMap::from_variant(variant)?;
         let property = map.get("volume")?;
         // NOTE: Wireplumber gives us the volume as the cube of a value between 0.0 an 1.0.
-        let volume = (f64::from_variant(property)?.powf(1.0 / 3.0) * 100.0).round();
+        let volume = (f64::from_variant(property)?.powf(1.0 / 3.0) * 100.0).round() as u8;
         Some(Self { volume })
     }
 }

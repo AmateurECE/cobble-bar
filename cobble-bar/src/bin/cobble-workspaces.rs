@@ -258,16 +258,12 @@ impl Hyprland {
 
 #[derive(serde::Serialize)]
 struct State {
-    content: Vec<String>,
+    content: String,
 }
 
-/// NOTE:
-/// * "circle (solid)": Indicates active workspace.
-/// * "circle-dot": Indicates existing workspaces.
-/// * "circle (light)": Indicates ordinally smaller but non-existent workspaces
-const CIRCLE_SOLID: &'static str = "\u{ea71}";
-const CIRCLE_DOT: &'static str = "\u{eabc}";
-const CIRCLE_LIGHT: &'static str = "\u{ec07}";
+const ACTIVE_WORKSPACE: &'static str = "\u{ebb4}";
+const INACTIVE_WORKSPACE: &'static str = "\u{eba5}";
+const MISSING_WORKSPACE: &'static str = "\u{ebb5}";
 
 impl From<Workspaces> for State {
     fn from(value: Workspaces) -> Self {
@@ -276,15 +272,15 @@ impl From<Workspaces> for State {
             .into_iter()
             .map(|i| {
                 if i == value.active_workspace {
-                    CIRCLE_SOLID
+                    ACTIVE_WORKSPACE
                 } else if value.workspaces.contains(&i) {
-                    CIRCLE_DOT
+                    INACTIVE_WORKSPACE
                 } else {
-                    CIRCLE_LIGHT
+                    MISSING_WORKSPACE
                 }
             })
-            .map(ToOwned::to_owned)
-            .collect::<Vec<String>>();
+            .collect::<Vec<&str>>()
+            .join("  ");
         State { content }
     }
 }
