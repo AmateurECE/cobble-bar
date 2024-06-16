@@ -46,7 +46,7 @@ enum HyprlandEvent {
 }
 
 fn parse_workspace(text: &str) -> Option<(u32, String)> {
-    let mut items = text.split(",");
+    let mut items = text.split(',');
     let id: u32 = items.next()?.parse().ok()?;
     let name = items.next()?.to_string();
     Some((id, name))
@@ -207,7 +207,7 @@ impl Hyprland {
         let socket = UnixSocket::new_stream()?;
         let mut control = socket.connect(socket_path).await?;
 
-        control.write(path).await?;
+        control.write_all(path).await?;
         let mut response = String::new();
         control.read_to_string(&mut response).await?;
 
@@ -243,8 +243,8 @@ impl Hyprland {
             let mut events = VecDeque::new();
             while events.is_empty() {
                 let mut buffer = [0u8; 128];
-                stream.read(&mut buffer).await.ok()?;
-                let event = String::from_utf8_lossy(&buffer);
+                let length = stream.read(&mut buffer).await.ok()?;
+                let event = String::from_utf8_lossy(&buffer[..length]);
                 events = event
                     .trim_matches(char::from(0))
                     .lines()
@@ -261,15 +261,14 @@ struct State {
     content: String,
 }
 
-const ACTIVE_WORKSPACE: &'static str = "\u{ebb4}";
-const INACTIVE_WORKSPACE: &'static str = "\u{eba5}";
-const MISSING_WORKSPACE: &'static str = "\u{ebb5}";
+const ACTIVE_WORKSPACE: &str = "\u{ebb4}";
+const INACTIVE_WORKSPACE: &str = "\u{eba5}";
+const MISSING_WORKSPACE: &str = "\u{ebb5}";
 
 impl From<Workspaces> for State {
     fn from(value: Workspaces) -> Self {
         let max_workspace = value.workspaces.iter().max().unwrap();
         let content = (1..max_workspace + 1)
-            .into_iter()
             .map(|i| {
                 if i == value.active_workspace {
                     ACTIVE_WORKSPACE
