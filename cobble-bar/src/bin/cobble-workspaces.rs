@@ -265,9 +265,9 @@ struct State {
     content: String,
 }
 
-const CIRCLE_SOLID: &'static str = "<i class=\"fa-solid fa-circle\"></i>";
-const CIRCLE_DOT: &'static str = "<i class=\"fa-regular fa-circle-dot\"></i>";
-const CIRCLE_LIGHT: &'static str = "<i class=\"fa-light fa-circle\"></i>";
+const CIRCLE_SOLID: &'static str = "\u{f111}";
+const CIRCLE_DOT: &'static str = "\u{f192}";
+const CIRCLE_LIGHT: &'static str = "\u{f1db}";
 
 impl From<Workspaces> for State {
     fn from(value: Workspaces) -> Self {
