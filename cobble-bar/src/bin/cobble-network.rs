@@ -61,15 +61,20 @@ struct State {
     content: String,
 }
 
+lazy_static::lazy_static! {
+    static ref CONNECTED: String = String::from_utf16(&[0xdb81, 0xdda9]).unwrap();
+    static ref CONNECTING: String = String::from_utf16(&[0xdb85, 0xdec6]).unwrap();
+    static ref DISCONNECTED: String = String::from_utf16(&[0xdb82, 0xdd2b]).unwrap();
+}
+
 impl From<NetworkState> for State {
     fn from(value: NetworkState) -> Self {
-        let icon = match value {
-            NetworkState::Disconnected => "fa-exclamation",
-            NetworkState::Connecting => "fa-exclamation",
-            NetworkState::Connected => "fa-wifi",
+        let content = match value {
+            NetworkState::Disconnected => DISCONNECTED.to_owned(),
+            NetworkState::Connecting => CONNECTING.to_owned(),
+            NetworkState::Connected => CONNECTED.to_owned(),
         };
 
-        let content = format!("<i class=\"fa-solid {}\"></i>", icon);
         State { content }
     }
 }
