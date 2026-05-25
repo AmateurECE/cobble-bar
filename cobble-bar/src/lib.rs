@@ -44,6 +44,7 @@ where
 }
 
 /// Convenience function for wrapping a stream in a [FlatteningStream].
+#[allow(dead_code)]
 fn flatten<I, S>(inner: S) -> impl Stream<Item = I>
 where
     S: Stream<Item = VecDeque<I>>,

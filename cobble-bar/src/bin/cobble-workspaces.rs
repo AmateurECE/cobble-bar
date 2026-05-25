@@ -1,4 +1,4 @@
-use cobble_bar::workspace::{hyprland::Hyprland, Workspaces};
+use cobble_bar::workspace::{sway::Sway, Workspaces};
 use futures::{pin_mut, StreamExt};
 
 #[derive(serde::Serialize)]
@@ -37,7 +37,7 @@ fn print_state(workspaces: Workspaces) -> anyhow::Result<()> {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
-    let mut window_manager = Hyprland::new_connection().await?;
+    let mut window_manager = Sway::new_connection().await?;
     let mut state = window_manager.workspaces().await?;
     print_state(state.clone())?;
 
