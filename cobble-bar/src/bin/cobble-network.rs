@@ -53,6 +53,12 @@ enum NetworkState {
     Connecting,
 
     /// Reached when a default route is present and the low level transport is up.
+    /// FIXME: I've seen a case where (similar to waybar) we are associated with an SSID, we have an
+    /// IP address and a default route, but no internet access (pinging anything except the wlan0
+    /// interface doesn't work, DNS doesn't work, etc). In this case, dhcpcd fails to get a DHCP
+    /// IPv4 address, so it uses the IPv4LL address, which is often a /16 address in the 169.
+    /// subnet. I don't know why this is and I need to fix it, but a connectivity test would also
+    /// help in these cases.
     Connected,
 }
 

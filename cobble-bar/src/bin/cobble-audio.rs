@@ -92,7 +92,12 @@ fn print_state(default_nodes_api: &Plugin, mixer_api: &Plugin) {
 }
 
 /// Sets up the application by registering signal handlers and initializing objects.
-async fn application(core: &Core, object_manager: &ObjectManager) -> anyhow::Result<()> {
+// NOTE: Require 'static on Core/ObjectManager because if either is allowed to Drop, e.g. by moving them into the Future
+// created below, the signal handlers will never run.
+async fn application(
+    core: &'static Core,
+    object_manager: &'static ObjectManager,
+) -> anyhow::Result<()> {
     let interest = ObjectInterest::new_type(Node::static_type());
     interest.add_constraint(
         ConstraintType::PwProperty,
@@ -129,15 +134,13 @@ fn main() {
 
     let context = glib::MainContext::default();
 
-    let core = Core::new(Some(&context), None, None);
+    let core = Box::new(Core::new(Some(&context), None, None));
     core.connect();
 
-    // NOTE: If the Core/ObjectManager are allowed to Drop, e.g. by moving them into the Future
-    // created below, the signal handlers will never run.
-    let object_manager = ObjectManager::new();
+    let object_manager = Box::new(ObjectManager::new());
 
     context
-        .block_on(application(&core, &object_manager))
+        .block_on(application(Box::leak(core), Box::leak(object_manager)))
         .unwrap();
 
     let main_loop = glib::MainLoop::new(Some(&context), false);

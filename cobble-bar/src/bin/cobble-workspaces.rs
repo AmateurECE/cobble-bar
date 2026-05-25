@@ -247,6 +247,9 @@ impl Hyprland {
                 let event = String::from_utf8_lossy(&buffer[..length]);
                 events = event
                     .trim_matches(char::from(0))
+                    // FIXME: I'm sure I'm being bitten by missing partial messages here.
+                    // Switching very rapidly between workspace causes me to drop events, which
+                    // makes it seem like I'm in the wrong workspace.
                     .lines()
                     .filter_map(|line| line.parse().ok())
                     .collect::<VecDeque<HyprlandEvent>>();
